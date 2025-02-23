@@ -41,32 +41,52 @@ Imax_lim  = 0.05;    % [A]  (50 mA) limite courant
 %H_elec_mec_Fostex = tf([0, HP1.Mm, HP1.Rm, HP1.Km], [(HP1.Mm*HP1.Le), (HP1.Mm*HP1.Re + HP1.Mm*Rs + HP1.Rm*HP1.Le), (HP1.Rm*HP1.Re + HP1.Rm*Rs + HP1.Km*HP1.Le + HP1.Bl*HP1.Bl), (HP1.Km*HP1.Re + HP1.Km*Rs)]);
 %H_elec_mec_SEAS   = tf([0, HP2.Mm, HP2.Rm, HP2.Km], [(HP2.Mm*HP2.Le), (HP2.Mm*HP2.Re + HP2.Mm*Rs + HP2.Rm*HP2.Le), (HP2.Rm*HP2.Re + HP2.Rm*Rs + HP2.Km*HP2.Le + HP2.Bl*HP2.Bl), (HP2.Km*HP2.Re + HP2.Km*Rs)]);
 
+s = tf('s');
 % Mecanique
-H_mec_Fostex =  tf([0,0,HP1.Bl],[HP1.Mm, HP1.Rm, HP1.Km])
-H_mec_SEAS   =  tf([0,0,HP2.Bl],[HP2.Mm, HP2.Rm, HP2.Km])
+H_mec_Fostex =  (HP1.Bl)/(HP1.Mm*s^2 + HP1.Rm*s + HP1.Km)
+H_mec_SEAS   =  (HP2.Bl)/(HP2.Mm*s^2 + HP2.Rm*s + HP2.Km)
 
 % Electrique
-H_elec_Fostex  = tf([0,0,1],[0,HP1.Le+ HP1.Bl * H_mec_Fostex, HP1.Re + Rs]);
-H_elec_SEAS     = tf([0,0,1],[0,HP1.Le+ HP1.Bl * H_mec_SEAS,   HP2.Re + Rs]);
+H_elec_Fostex  = 1/((HP1.Le + HP1.Bl * H_mec_Fostex)*s + HP1.Re + Rs);
+H_elec_SEAS     = 1/((HP2.Le + HP2.Bl * H_mec_Fostex)*s + HP2.Re + Rs);
 
 % Accoustique
 H_acc_Fostex = tf([(rho*HP1.Sm) / (2*pi()*d), 0, 0],[1], "InputDelay", d/c)
 H_acc_SEAS   = tf([(rho*HP2.Sm) / (2*pi()*d), 0, 0],[1], "InputDelay", d/c)
 
 % Globale
-H_global_Fostex = H_elec_Fostex * H_acc_Fostex
-H_global_SEAS   = H_elec_SEAS * H_acc_SEAS
+H_global_Fostex = H_elec_Fostex * H_acc_Fostex * H_mec_Fostex
+H_global_SEAS   = H_elec_SEAS * H_acc_SEAS * H_mec_SEAS
 
 dt = 0.01;
 t = 0:dt:10;
 %ha_SEAS = impulse(minreal(H_global_SEAS),t);
 %ha_Fostrex = impulse(minreal(H_global_Fostrex),t);
-figure('Name',"Bode Mec")
-subplot(2,1,1);
+figure('Name',"Diagrammes de bode")
+subplot(2,2,1);
 bode(H_elec_Fostex, 'b', H_elec_SEAS, '-r',{1,1e5});
 title("Elec");
-subplot(2,1,2);
+subplot(2,2,2);
 bode(H_mec_Fostex, 'b', H_mec_SEAS, '-r',{1,1e5});
 title("Mec");
+subplot(2,2,3);
+bode(H_global_Fostex, 'b', H_global_SEAS, '-r',{1,1e5});
+title("Global");
+subplot(2,2,4);
+bode(H_acc_Fostex, 'b', H_acc_SEAS, '-r',{1,1e5});
+title("Accoustique");
+
+%% Reponse à une impulsion
+dt = 0.0001;
+t = 0:dt:0.1;
+tt = -0.1:dt:0.1;
+Impultion_entree = (tt<=0 & tt<=0.01).*3.3;
+rep = conv(impulse(H_global_Fostex,t), Impultion_entree, 'same');
+
+figure('Name',"Reponse à l'impulsion")
+plot(t, rep);
+plot(t, Impultion_entree)
+
+
 
 
