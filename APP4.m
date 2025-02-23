@@ -38,29 +38,35 @@ Imax_lim  = 0.05;    % [A]  (50 mA) limite courant
 %% 2) Fonction de transferts
 % -------------------------------------------------------------------------
 % Electrique + Mecanique
-H_elec_mec_Fostex = tf([0, HP1.Mm, HP1.Rm, HP1.Km], [(HP1.Mm*HP1.Le), (HP1.Mm*HP1.Re + HP1.Mm*Rs + HP1.Rm*HP1.Le), (HP1.Rm*HP1.Re + HP1.Rm*Rs + HP1.Km*HP1.Le + HP1.Bl*HP1.Bl), (HP1.Km*HP1.Re + HP1.Km*Rs)]);
-H_elec_mec_SEAS   = tf([0, HP2.Mm, HP2.Rm, HP2.Km], [(HP2.Mm*HP2.Le), (HP2.Mm*HP2.Re + HP2.Mm*Rs + HP2.Rm*HP2.Le), (HP2.Rm*HP2.Re + HP2.Rm*Rs + HP2.Km*HP2.Le + HP2.Bl*HP2.Bl), (HP2.Km*HP2.Re + HP2.Km*Rs)]);
-
+%H_elec_mec_Fostex = tf([0, HP1.Mm, HP1.Rm, HP1.Km], [(HP1.Mm*HP1.Le), (HP1.Mm*HP1.Re + HP1.Mm*Rs + HP1.Rm*HP1.Le), (HP1.Rm*HP1.Re + HP1.Rm*Rs + HP1.Km*HP1.Le + HP1.Bl*HP1.Bl), (HP1.Km*HP1.Re + HP1.Km*Rs)]);
+%H_elec_mec_SEAS   = tf([0, HP2.Mm, HP2.Rm, HP2.Km], [(HP2.Mm*HP2.Le), (HP2.Mm*HP2.Re + HP2.Mm*Rs + HP2.Rm*HP2.Le), (HP2.Rm*HP2.Re + HP2.Rm*Rs + HP2.Km*HP2.Le + HP2.Bl*HP2.Bl), (HP2.Km*HP2.Re + HP2.Km*Rs)]);
 
 % Mecanique
-H_mec_Fostex =  tf([0,0,HP1.Bl],[HP1.Mm, HP1.Rm, HP1.Km]);
-H_mec_SEAS   =  tf([0,0,HP2.Bl],[HP2.Mm, HP2.Rm, HP2.Km]);
+H_mec_Fostex =  tf([0,0,HP1.Bl],[HP1.Mm, HP1.Rm, HP1.Km])
+H_mec_SEAS   =  tf([0,0,HP2.Bl],[HP2.Mm, HP2.Rm, HP2.Km])
+
+% Electrique
+H_elec_Fostex  = tf([0,0,1],[0,HP1.Le+ HP1.Bl * H_mec_Fostex, HP1.Re + Rs]);
+H_elec_SEAS     = tf([0,0,1],[0,HP1.Le+ HP1.Bl * H_mec_SEAS,   HP2.Re + Rs]);
 
 % Accoustique
-H_acc_Fostex = tf([(rho*HP1.Sm) / (2*pi()*d), 0, 0],[1], "InputDelay", d/c);
-H_acc_SEAS   = tf([(rho*HP2.Sm) / (2*pi()*d), 0, 0],[1], "InputDelay", d/c);
+H_acc_Fostex = tf([(rho*HP1.Sm) / (2*pi()*d), 0, 0],[1], "InputDelay", d/c)
+H_acc_SEAS   = tf([(rho*HP2.Sm) / (2*pi()*d), 0, 0],[1], "InputDelay", d/c)
 
 % Globale
-H_global_Fostex = H_elec_mec_Fostex * H_acc_Fostex;
-H_global_SEAS   = H_elec_mec_SEAS * H_acc_SEAS;
+H_global_Fostex = H_elec_Fostex * H_acc_Fostex
+H_global_SEAS   = H_elec_SEAS * H_acc_SEAS
 
 dt = 0.01;
 t = 0:dt:10;
-ha_SEAS = impulse(minreal(H_global_SEAS),t);
-ha_Fostrex = impulse(minreal(H_global_Fostrex),t);
-figure('Name',"Réponse à l'impulsion")
+%ha_SEAS = impulse(minreal(H_global_SEAS),t);
+%ha_Fostrex = impulse(minreal(H_global_Fostrex),t);
+figure('Name',"Bode Mec")
 subplot(2,1,1);
-plot(h_SEAS,t);
-plot(h_Fostrex);
+bode(H_elec_Fostex, 'b', H_elec_SEAS, '-r',{1,1e5});
+title("Elec");
+subplot(2,1,2);
+bode(H_mec_Fostex, 'b', H_mec_SEAS, '-r',{1,1e5});
+title("Mec");
 
 
