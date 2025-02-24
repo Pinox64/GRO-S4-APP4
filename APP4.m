@@ -135,10 +135,10 @@ yGlobalSEAS = conv(h_a2, Impultion_entree, 'same')*dt/2;   % Convolution pour ob
 yElecSEAS = conv(h_e2, Impultion_entree, 'same')*dt/2;
 
 % Methode 2
-%yGlobalFostex = lsim(H_global_Fostex, Impultion_entree_trunc, t);
-%yElecFostex = lsim(H_elec_Fostex, Impultion_entree_trunc, t);
-%yGlobalSEAS = lsim(H_global_SEAS, Impultion_entree_trunc, t);
-%yElecSEAS = lsim(H_elec_SEAS, Impultion_entree_trunc, t);
+yGlobalFostex = lsim(H_global_Fostex, Impultion_entree_trunc, t);
+yElecFostex = lsim(H_elec_Fostex, Impultion_entree_trunc, t);
+yGlobalSEAS = lsim(H_global_SEAS, Impultion_entree_trunc, t);
+yElecSEAS = lsim(H_elec_SEAS, Impultion_entree_trunc, t);
 
 %-----affichage-----
 % Création de la figure avec un fond blanc
@@ -196,7 +196,7 @@ t_pwm = linspace(0, PWM_Period, 100);   % Temps sur une période du PWM
 y_pwm = (t_pwm < PWM_Period/2) * U_arduino;  % Signal carré (50% duty cycle)
 
 %Calculer la série de fourrier du signal d'entrée
-N_harmoniques = 50;                     % Nombre d'harmoniques à évaluer
+N_harmoniques = 10;                     % Nombre d'harmoniques à évaluer
 X_k = zeros(2*N_harmoniques+1);         % Coefficients de fourrier
 k = [-N_harmoniques:1:N_harmoniques];   % Indice des harmoniques
 
