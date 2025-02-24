@@ -256,6 +256,7 @@ figure('Name', "Réponse PWM", 'Color', 'w');
 
 % Réponse globale Fostex
 subplot(2,2,1);
+yyaxis("left");
 plot(t_pwm, yGlobalPWM_Fostex, 'b-', 'LineWidth', 2);
 
 grid on;
@@ -263,6 +264,9 @@ title('Global Fostex', 'FontSize', 14, 'FontWeight', 'bold');
 xlabel('Temps [s]', 'FontSize', 12);
 ylabel('Amplitude', 'FontSize', 12);
 xlim([0, max(t_pwm)]);
+hold on
+yyaxis("right");
+plot(t_pwm, y_pwm, 'bk');
 
 % Réponse en courant Fostex
 subplot(2,2,2);
