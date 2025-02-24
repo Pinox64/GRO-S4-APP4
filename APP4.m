@@ -92,7 +92,7 @@ title("Accoustique");
 
 %% 3) Reponse à une impulsion
 %--------------------------------------------------------------------------
-dt = 0.001;                        % Pas de temps de l'evaluation de l'impulsion
+dt = 0.00000001;                        % Pas de temps de l'evaluation de l'impulsion
 t = 0:dt:0.1;                       % Echelle temporelle de l'evaluation de l'impulsion
 tt = -0.1:dt:0.1;
 Impultion_entree = (tt>= 0 & tt<=0.01).*U_arduino;  % Signal d'entrée
@@ -133,11 +133,11 @@ subplot(2,1,1)
 plot(t, rep1);
 title("Haut-Parleur #1")
 ylabel("Pression (pa)")
-%hold on;
-%yyaxis right
-%ylabel("courant(A)");
-%plot(t, i1);
-%grid on;
+hold on;
+yyaxis right
+ylabel("courant(A)");
+plot(t, i1);
+grid on;
 
 subplot(2,1,2)
 title("Haut-Parleur #2")
@@ -150,7 +150,6 @@ plot(t, i2);
 grid on;
 yyaxis right
 %title("Réponse du système à une impulsion de 10ms");
-
 figure('name', 'test')
 plot(t,rep1);
 
