@@ -166,7 +166,7 @@ ylim([min(yElecFostex)-0.1, max(yElecFostex)+0.1]);
 
 % Réponse impultionelle globale SEAS
 subplot(2,2,3);
-plot(t, yGlobalSEAS, 'r-', 'LineWidth', 2);
+plot(t, yGlobalSEAS, 'b-', 'LineWidth', 2);
 grid on;
 title('Réponse Globale SEAS', 'FontSize', 14, 'FontWeight', 'bold');
 xlabel('Temps [s]', 'FontSize', 12);
@@ -176,7 +176,7 @@ ylim([min(yGlobalSEAS)-0.1, max(yGlobalSEAS)+0.1]);
 
 % Réponse impultionelle en courant SEAS
 subplot(2,2,4);
-plot(t, yElecSEAS, 'r-', 'LineWidth', 2);
+plot(t, yElecSEAS, 'b-', 'LineWidth', 2);
 grid on;
 title('Réponse Courant SEAS', 'FontSize', 14, 'FontWeight', 'bold');
 xlabel('Temps [s]', 'FontSize', 12);
@@ -258,19 +258,17 @@ end
 % Création de la figure avec un fond blanc
 figure('Name', "Réponse PWM", 'Color', 'w');
 clf;
+
 % Réponse globale Fostex
 subplot(2,2,1);
 yyaxis("left");
 plot(t_pwm, yGlobalPWM_Fostex, 'b-', 'LineWidth', 2);
-
 grid on;
 title('Global Fostex', 'FontSize', 14, 'FontWeight', 'bold');
 xlabel('Temps [s]', 'FontSize', 12);
 ylabel('Amplitude', 'FontSize', 12);
 xlim([0, max(t_pwm)]);
 hold on
-ax = gca;
-ax.YColor = 'b';
 yyaxis("right");
 plot(t_pwm, y_pwm, 'k');
 ylabel("Tension d'entrée (V)")
@@ -312,6 +310,7 @@ ax.YColor = 'k';  % Left axis color to black
 
 % Réponse en courant SEAS
 subplot(2,2,4);
+yyaxis("left")
 plot(t_pwm, yElecPWM_SEAS, 'b-', 'LineWidth', 2);
 grid on;
 title('Courant SEAS', 'FontSize', 14, 'FontWeight', 'bold');
