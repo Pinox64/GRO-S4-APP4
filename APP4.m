@@ -117,6 +117,10 @@ end
 for ii=1:length(P2)
     h_e2 = h_e2+Re2(ii)*exp(Pe2(ii)*t);
 end
+h_a1=impulse(H_global_Fostex,t);
+h_e1=impulse(H_elec_Fostex,t);
+h_a2=impulse(H_global_SEAS,t);
+h_e2=impulse(H_elec_SEAS,t);
 % Calcul conv
 rep1 = conv(h_a1, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
 i1 = conv(h_e1, Impultion_entree, 'same')*dt/2;     % **% Division par 2 pour compenser l'intégration sur un vecteur symétrique doublant l'aire effective de l'impulsion.
