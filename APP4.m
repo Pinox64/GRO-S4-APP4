@@ -119,7 +119,7 @@ for ii=1:length(P2)
 end
 % Calcul conv
 rep1 = conv(h_a1, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
-i1 = conv(h_e1, Impultion_entree, 'same')*dt/2;
+i1 = conv(h_e1, Impultion_entree, 'same')*dt/2;     % **% Division par 2 pour compenser l'intégration sur un vecteur symétrique doublant l'aire effective de l'impulsion.
 rep2 = conv(h_a2, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
 i2 = conv(h_e2, Impultion_entree, 'same')*dt/2;
 %-----affichage-----
