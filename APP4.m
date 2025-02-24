@@ -217,34 +217,38 @@ title("Phase");
 for ik = 1:length(k)
     H_k1(ik) = evalfr(H_global_Fostex, 1i*k(ik)*w0);
     H_k2(ik) = evalfr(H_global_SEAS, 1i*k(ik)*w0);
+    He_k1(ik) = evalfr(H_elec_Fostex, 1i*k(ik)*w0);
+    He_k2(ik) = evalfr(H_elec_SEAS, 1i*k(ik)*w0);
 end
 
 % Calculer les coefficients de fourrier de la sortie
 for ik = 1:length(k)
     Y_k1(ik) = X_k(ik)*H_k1(ik);
     Y_k2(ik) = X_k(ik)*H_k2(ik);
+    Ye_k1(ik) = X_k(ik)*He_k1(ik);
+    Ye_k2(ik) = X_k(ik)*He_k2(ik);
 end
 
 % Reconstruction du signal de sortie à partir des coeffs de fourrier
 yGlobalPWM_Fostex = zeros(size(t_pwm));
 yGlobalPWM_SEAS = zeros(size(t_pwm));
+yElecPWM_Fostex = zeros(size(t_pwm));
+yElecPWM_SEAS = zeros(size(t_pwm));
 x_t = zeros(size(t_pwm));
 for ik = 1: length(k)
     x_t = x_t + X_k(ik)*exp(1i*k(ik)*w0*t_pwm);
     yGlobalPWM_Fostex = yGlobalPWM_Fostex + Y_k1(ik)*exp(1i*k(ik)*w0*t_pwm);
     yGlobalPWM_SEAS = yGlobalPWM_SEAS + Y_k2(ik)*exp(1i*k(ik)*w0*t_pwm);
+    yElecPWM_Fostex = yElecPWM_Fostex + Ye_k1(ik)*exp(1i*k(ik)*w0*t_pwm);
+    yElecPWM_SEAS =   yElecPWM_SEAS + Ye_k2(ik)*exp(1i*k(ik)*w0*t_pwm);
 end
-
-% Additionne plusieurs périodes
-nPeriods = 4;           % Number of periods to repeat
-T = t_pwm(end) - t_pwm(1) + (t_pwm(2)-t_pwm(1));  % Compute period length (assuming uniform sampling)
 
 % Methode 2
 % Simulation de la réponse pour Fostex et SEAS (réponses globale et en courant)
 %yGlobalPWM_Fostex = lsim(H_global_Fostex, y_pwm, t_pwm);
-yElecPWM_Fostex   = lsim(H_elec_Fostex,   y_pwm, t_pwm);
+%yElecPWM_Fostex   = lsim(H_elec_Fostex,   y_pwm, t_pwm);
 %yGlobalPWM_SEAS   = lsim(H_global_SEAS,   y_pwm, t_pwm);
-yElecPWM_SEAS     = lsim(H_elec_SEAS,     y_pwm, t_pwm);
+%yElecPWM_SEAS     = lsim(H_elec_SEAS,     y_pwm, t_pwm);
 
 %-----affichage-----
 % Création de la figure avec un fond blanc
