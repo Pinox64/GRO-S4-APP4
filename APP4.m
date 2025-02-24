@@ -96,54 +96,64 @@ dt = 0.001;                        % Pas de temps de l'evaluation de l'impulsion
 t = 0:dt:0.1;                       % Echelle temporelle de l'evaluation de l'impulsion
 tt = -0.1:dt:0.1;
 Impultion_entree = (tt>= 0 & tt<=0.01).*U_arduino;  % Signal d'entrée
-% Methode 1
-%RI = impulse_rational(H_global_Fostex,t);    % Réponse à l'impulsion de dirac
-h_a1 = impulse_rational(H_global_Fostex,t);    % Réponse à l'impulsion de dirac
-h_e1 = impulse_rational(H_elec_Fostex,t);
-h_a2 = impulse_rational(H_global_SEAS,t);
-h_e2 = impulse_rational(H_elec_SEAS,t);
 %Methode2
 [R1, P1, K1] = residue(H_global_Fostex.Numerator{1}, H_global_Fostex.Denominator{1});
+[Re1, Pe1, Ke1] = residue(H_elec_Fostex.Numerator{1}, H_elec_Fostex.Denominator{1});
 [R2, P2, K2] = residue(H_global_SEAS.Numerator{1}, H_global_SEAS.Denominator{1});
-ha1=0;
+[Re2, Pe2, Ke2] = residue(H_elec_SEAS.Numerator{1}, H_elec_SEAS.Denominator{1});
+h_a1=0;
+h_e1=0;
+h_a2=0;
+h_e2=0;
 for ii=1:length(P1)
     h_a1 = h_a1+R1(ii)*exp(P1(ii)*t);
+end
+for ii=1:length(Pe1)
+    h_e1 = h_e1+Re1(ii)*exp(Pe1(ii)*t);
 end
 for ii=1:length(P2)
     h_a2 = h_a2+R2(ii)*exp(P2(ii)*t);
 end
+for ii=1:length(P2)
+    h_e2 = h_e2+Re2(ii)*exp(Pe2(ii)*t);
+end
 % Calcul conv
 rep1 = conv(h_a1, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
-%i1 = conv(h_e1, Impultion_entree, 'same')*dt;
+i1 = conv(h_e1, Impultion_entree, 'same')*dt;
 rep2 = conv(h_a2, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
-%i2 = conv(h_e2, Impultion_entree, 'same')*dt;
+i2 = conv(h_e2, Impultion_entree, 'same')*dt;
 %-----affichage-----
 % Find indices where t >= 0
 idx = tt >= 0;
 Impultion_entree_trunc = Impultion_entree(idx);
 figure('Name',"Reponse à l'impulsion")
+clf;
 subplot(2,1,1)
 %yyaxis left
 plot(t, rep1);
 title("Haut-Parleur #1")
+ylabel("Pression (pa)")
 %hold on;
 %yyaxis right
 %ylabel("courant(A)");
-%%plot(t, i1);
-grid on;
+%plot(t, i1);
+%grid on;
 
 subplot(2,1,2)
 title("Haut-Parleur #2")
-%yyaxis left
+yyaxis left
 plot(t, rep2);
 hold on;
-%yyaxis right
-%ylabel("courant(A)");
-%%plot(t, i2);
-%grid on;
-%yyaxis right
-%plot(t, Impultion_entree_trunc);
+yyaxis right
+ylabel("courant(A)");
+plot(t, i2);
+grid on;
+yyaxis right
 %title("Réponse du système à une impulsion de 10ms");
+
+figure('name', 'test')
+plot(t,rep1);
+
 
 %% 4) Reponse à un pwm
 %--------------------------------------------------------------------------
