@@ -53,12 +53,20 @@ H_mec_SEAS   =  minreal((HP2.Bl)/(HP2.Mm*s^2 + HP2.Rm*s + HP2.Km))
 H_elec_Fostex  = minreal(1/((HP1.Le + HP1.Bl * H_mec_Fostex)*s + HP1.Re + Rs))
 H_elec_SEAS    = minreal(1/((HP2.Le + HP2.Bl * H_mec_SEAS)*s + HP2.Re + Rs))
 
+[elec_num_coefs_Fostex, elec_den_coefs_Fostex] = tfdata(H_elec_Fostex, 'v');
+[elec_num_coefs_SEAS, elec_den_coefs_SEAS] = tfdata(H_elec_SEAS, 'v');
+
 % Accoustique
 H_acc_Fostex = minreal(tf([(rho*HP1.Sm) / (2*pi*d), 0, 0],1, "InputDelay", d/c))
 H_acc_SEAS   = minreal(tf([(rho*HP2.Sm) / (2*pi*d), 0, 0],1, "InputDelay", d/c))
+
 % Global
 H_global_Fostex = minreal(series(H_acc_Fostex, series(H_mec_Fostex,H_elec_Fostex)))
 H_global_SEAS   = minreal(series(H_acc_SEAS, series(H_mec_SEAS, H_elec_SEAS)))
+
+[global_num_coefs_Fostex, global_den_coefs_Fostex] = tfdata(H_global_Fostex, 'v');
+[global_num_coefs_SEAS, global_den_coefs_SEAS] = tfdata(H_global_SEAS, 'v');
+
 
 dt = 0.01;
 t = 0:dt:10;
