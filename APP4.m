@@ -46,20 +46,19 @@ PWM_Period = 1/PWM_Freq;    % [S]  Période du pwm
 
 s = tf('s');
 % Mecanique
-H_mec_Fostex =  (HP1.Bl)/(HP1.Mm*s^2 + HP1.Rm*s + HP1.Km)
-H_mec_SEAS   =  (HP2.Bl)/(HP2.Mm*s^2 + HP2.Rm*s + HP2.Km)
+H_mec_Fostex =  minreal((HP1.Bl)/(HP1.Mm*s^2 + HP1.Rm*s + HP1.Km))
+H_mec_SEAS   =  minreal((HP2.Bl)/(HP2.Mm*s^2 + HP2.Rm*s + HP2.Km))
 
 % Electrique
-H_elec_Fostex  = 1/((HP1.Le + HP1.Bl * H_mec_Fostex)*s + HP1.Re + Rs);
-H_elec_SEAS    = 1/((HP2.Le + HP2.Bl * H_mec_Fostex)*s + HP2.Re + Rs);
+H_elec_Fostex  = minreal(1/((HP1.Le + HP1.Bl * H_mec_Fostex)*s + HP1.Re + Rs))
+H_elec_SEAS    = minreal(1/((HP2.Le + HP2.Bl * H_mec_SEAS)*s + HP2.Re + Rs))
 
 % Accoustique
-H_acc_Fostex = tf([(rho*HP1.Sm) / (2*pi()*d), 0, 0],[1], "InputDelay", d/c)
-H_acc_SEAS   = tf([(rho*HP2.Sm) / (2*pi()*d), 0, 0],[1], "InputDelay", d/c)
-
-% Globale
-H_global_Fostex = H_elec_Fostex * H_acc_Fostex * H_mec_Fostex
-H_global_SEAS   = H_elec_SEAS * H_acc_SEAS * H_mec_SEAS
+H_acc_Fostex = minreal(tf([(rho*HP1.Sm) / (2*pi*d), 0, 0],1, "InputDelay", d/c))
+H_acc_SEAS   = minreal(tf([(rho*HP2.Sm) / (2*pi*d), 0, 0],1, "InputDelay", d/c))
+% Global
+H_global_Fostex = minreal(series(H_acc_Fostex, series(H_mec_Fostex,H_elec_Fostex)))
+H_global_SEAS   = minreal(series(H_acc_SEAS, series(H_mec_SEAS, H_elec_SEAS)))
 
 dt = 0.01;
 t = 0:dt:10;
@@ -83,28 +82,59 @@ bode(H_acc_Fostex, 'b', H_acc_SEAS, '-r',{1,1e5});
 grid on;
 title("Accoustique");
 
-%% Reponse à une impulsion
-dt = 0.0001;                        % Pas de temps de l'evaluation de l'impulsion
+%% 3) Reponse à une impulsion
+%--------------------------------------------------------------------------
+dt = 0.001;                        % Pas de temps de l'evaluation de l'impulsion
 t = 0:dt:0.1;                       % Echelle temporelle de l'evaluation de l'impulsion
 tt = -0.1:dt:0.1;
 Impultion_entree = (tt>= 0 & tt<=0.01).*U_arduino;  % Signal d'entrée
-RI = impulse(H_global_Fostex,t);    % Réponse à l'impulsion de dirac
-rep = conv(RI, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
-
+% Methode 1
+%RI = impulse_rational(H_global_Fostex,t);    % Réponse à l'impulsion de dirac
+h_a1 = impulse(H_global_Fostex,t);    % Réponse à l'impulsion de dirac
+h_e1 = impulse(H_elec_Fostex,t);
+h_a2 = impulse(H_global_SEAS,t);
+h_e2 = impulse(H_elec_SEAS,t);
+%Methode2
+%[R, P, K] = residue(H_global_Fostex.Numerator{1}, H_global_Fostex.Denominator{1});
+%RI=0;
+%for ii=1:length(P)
+%    RI = RI+R(ii)*exp(P(ii)*t);
+%end
+% Calcul conv
+rep1 = conv(h_a1, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
+i1 = conv(h_e1, Impultion_entree, 'same')*dt;
+rep2 = conv(h_a2, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
+i2 = conv(h_e2, Impultion_entree, 'same')*dt;
 %-----affichage-----
 % Find indices where t >= 0
 idx = tt >= 0;
 Impultion_entree_trunc = Impultion_entree(idx);
 figure('Name',"Reponse à l'impulsion")
+subplot(2,1,1)
+title("Haut-Parleur #1")
 yyaxis left
-plot(t, rep);
+plot(t, rep1);
 hold on;
-grid on;
 yyaxis right
-plot(t, Impultion_entree_trunc);
-title("Réponse du système à une impulsion de 10ms");
+ylabel("courant(A)");
+plot(t, i1);
+grid on;
 
-%% Reponse à un pwm
+subplot(2,1,2)
+title("Haut-Parleur #2")
+yyaxis left
+plot(t, rep2);
+hold on;
+yyaxis right
+ylabel("courant(A)");
+plot(t, i2);
+grid on;
+%yyaxis right
+%plot(t, Impultion_entree_trunc);
+%title("Réponse du système à une impulsion de 10ms");
+
+%% 4) Reponse à un pwm
+%--------------------------------------------------------------------------
 
 %Definition du signal
 w0 = 2*pi*PWM_Freq;
@@ -135,6 +165,53 @@ title("Phase");
 
 %Calculer la fct de transfert pour chaque harmonique
 for ik = 1:length(k)
-    H_k(ik) = evalfr(H_global_Fostex, j*k(ik)*w0);
+    H_k1(ik) = evalfr(H_global_Fostex, 1i*k(ik)*w0);
+    H_k2(ik) = evalfr(H_global_SEAS, 1i*k(ik)*w0);
 end
+
+% Calculer les coefficients de fourrier de la sortie
+for ik = 1:length(k)
+    Y_k1(ik) = X_k(ik)*H_k1(ik);
+    Y_k2(ik) = X_k(ik)*H_k2(ik);
+end
+
+% Reconstruction du signal de sortie à partir des coeffs de fourrier
+y_t1 = zeros(size(t));
+y_t2 = zeros(size(t));
+x_t = zeros(size(t));
+for ik = 1: length(k)
+    x_t = x_t + X_k(ik)*exp(1i*k(ik)*w0*t);
+    y_t1 = y_t1 + Y_k1(ik)*exp(1i*k(ik)*w0*t);
+    y_t2 = y_t2 + Y_k2(ik)*exp(1i*k(ik)*w0*t);
+end
+
+% Additionne plusieurs périodes
+nPeriods = 4;           % Number of periods to repeat
+T = t(end) - t(1) + (t(2)-t(1));  % Compute period length (assuming uniform sampling)
+
+t_new = [];
+x_new = [];
+y1_new = [];
+y2_new = [];
+
+for k = 0:nPeriods-1
+    t_new = [t_new, t + k*T];
+    x_new = [x_new, x_t];
+    y1_new = [y1_new, y_t1];
+    y2_new = [y2_new, y_t2];
+end
+
+% Affichage de la reponse au signal PWM
+figure('Name', 'Reponse au pwm');
+yyaxis right
+p1 = plot(t_new, y1_new, '-r');
+hold on;
+p2 = plot(t_new, y2_new, '-g');
+ylabel("Pression (Pa)");
+xlabel("Temps (s)");
+yyaxis left
+p3 = plot(t_new, x_new, '-b');
+ylabel("Tension (V)");
+legend([p1,p2,p3], "y(t) (Hp1)", "y(t) (Hp2)","x(t)");
+
 
