@@ -183,8 +183,6 @@ ylim([min(yElecSEAS)-0.1, max(yElecSEAS)+0.1]);
 % Titre global de la figure
 sgtitle('Simulation de la réponse impulsionnelle', 'FontSize', 16, 'FontWeight', 'bold');
 
-
-
 %% 4) Reponse à un pwm
 %--------------------------------------------------------------------------
 
@@ -252,6 +250,55 @@ for k = 0:nPeriods-1
     y1_new = [y1_new, y_t1];
     y2_new = [y2_new, y_t2];
 end
+
+% Création de la figure avec un fond blanc
+figure('Name', "Réponse PWM", 'Color', 'w');
+
+% Réponse globale Fostex
+subplot(2,2,1);
+plot(t_pwm, yGlobalPWM_Fostex, 'b-', 'LineWidth', 2);
+
+grid on;
+title('Global Fostex', 'FontSize', 14, 'FontWeight', 'bold');
+xlabel('Temps [s]', 'FontSize', 12);
+ylabel('Amplitude', 'FontSize', 12);
+xlim([0, max(t_pwm)]);
+
+% Réponse en courant Fostex
+subplot(2,2,2);
+plot(t_pwm, yElecPWM_Fostex, 'b-', 'LineWidth', 2);
+grid on;
+title('Courant Fostex', 'FontSize', 14, 'FontWeight', 'bold');
+xlabel('Temps [s]', 'FontSize', 12);
+ylabel('Courant [A]', 'FontSize', 12);
+xlim([0, max(t_pwm)]);
+
+% Réponse globale SEAS
+subplot(2,2,3);
+plot(t_pwm, yGlobalPWM_SEAS, 'r-', 'LineWidth', 2);
+grid on;
+title('Global SEAS', 'FontSize', 14, 'FontWeight', 'bold');
+xlabel('Temps [s]', 'FontSize', 12);
+ylabel('Amplitude', 'FontSize', 12);
+xlim([0, max(t_pwm)]);
+
+% Réponse en courant SEAS
+subplot(2,2,4);
+plot(t_pwm, yElecPWM_SEAS, 'r-', 'LineWidth', 2);
+grid on;
+title('Courant SEAS', 'FontSize', 14, 'FontWeight', 'bold');
+xlabel('Temps [s]', 'FontSize', 12);
+ylabel('Courant [A]', 'FontSize', 12);
+xlim([0, max(t_pwm)]);
+
+% Titre global de la figure
+sgtitle('Réponse à un signal PWM', 'FontSize', 16, 'FontWeight', 'bold');
+
+
+
+
+
+
 
 % Affichage de la reponse au signal PWM
 figure('Name', 'Reponse au pwm');
