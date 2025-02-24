@@ -124,6 +124,10 @@ end
 for ii=1:length(P2)
     h_e2 = h_e2+Re2(ii)*exp(Pe2(ii)*t);
 end
+h_a1=impulse(H_global_Fostex,t);
+h_e1=impulse(H_elec_Fostex,t);
+h_a2=impulse(H_global_SEAS,t);
+h_e2=impulse(H_elec_SEAS,t);
 % Calcul conv
 yGlobalFostex = conv(h_a1, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
 yElecFostex = conv(h_e1, Impultion_entree, 'same')*dt/2;     % **% Division par 2 pour compenser l'intégration sur un vecteur symétrique doublant l'aire effective de l'impulsion.
@@ -253,9 +257,10 @@ end
 %-----affichage-----
 % Création de la figure avec un fond blanc
 figure('Name', "Réponse PWM", 'Color', 'w');
-
+clf;
 % Réponse globale Fostex
 subplot(2,2,1);
+yyaxis("left");
 plot(t_pwm, yGlobalPWM_Fostex, 'b-', 'LineWidth', 2);
 
 grid on;
@@ -264,34 +269,60 @@ xlabel('Temps [s]', 'FontSize', 12);
 ylabel('Amplitude', 'FontSize', 12);
 xlim([0, max(t_pwm)]);
 hold on
-plot(t_pwm, X_)
+ax = gca;
+ax.YColor = 'b';
+yyaxis("right");
+plot(t_pwm, y_pwm, 'k');
+ylabel("Tension d'entrée (V)")
+ax = gca;
+ax.YColor = 'k';  % Left axis color to black
 
 % Réponse en courant Fostex
 subplot(2,2,2);
+yyaxis("left");
 plot(t_pwm, yElecPWM_Fostex, 'b-', 'LineWidth', 2);
 grid on;
 title('Courant Fostex', 'FontSize', 14, 'FontWeight', 'bold');
 xlabel('Temps [s]', 'FontSize', 12);
 ylabel('Courant [A]', 'FontSize', 12);
 xlim([0, max(t_pwm)]);
+hold on
+
+yyaxis("right");
+plot(t_pwm, y_pwm, 'k');
+ylabel("Tension d'entrée (V)")
+ax = gca;
+ax.YColor = 'k';  % Left axis color to black
 
 % Réponse globale SEAS
 subplot(2,2,3);
-plot(t_pwm, yGlobalPWM_SEAS, 'r-', 'LineWidth', 2);
+yyaxis("left");
+plot(t_pwm, yGlobalPWM_SEAS, 'b-', 'LineWidth', 2);
 grid on;
 title('Global SEAS', 'FontSize', 14, 'FontWeight', 'bold');
 xlabel('Temps [s]', 'FontSize', 12);
 ylabel('Amplitude', 'FontSize', 12);
 xlim([0, max(t_pwm)]);
+hold on;
+yyaxis("right");
+plot(t_pwm, y_pwm, 'k');
+ylabel("Tension d'entrée (V)")
+ax = gca;
+ax.YColor = 'k';  % Left axis color to black
 
 % Réponse en courant SEAS
 subplot(2,2,4);
-plot(t_pwm, yElecPWM_SEAS, 'r-', 'LineWidth', 2);
+plot(t_pwm, yElecPWM_SEAS, 'b-', 'LineWidth', 2);
 grid on;
 title('Courant SEAS', 'FontSize', 14, 'FontWeight', 'bold');
 xlabel('Temps [s]', 'FontSize', 12);
 ylabel('Courant [A]', 'FontSize', 12);
 xlim([0, max(t_pwm)]);
-
+hold on
+yyaxis("right");
+plot(t_pwm, y_pwm, 'k');
+ylabel("Tension d'entrée (V)")
+ax = gca;
+ax.YColor = 'k';  % Left axis color to black
 % Titre global de la figure
 sgtitle('Réponse à un signal PWM', 'FontSize', 16, 'FontWeight', 'bold');
