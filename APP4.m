@@ -92,7 +92,7 @@ title("Accoustique");
 
 %% 3) Reponse à une impulsion
 %--------------------------------------------------------------------------
-dt = 0.00000001;                        % Pas de temps de l'evaluation de l'impulsion
+dt = 0.000001;                        % Pas de temps de l'evaluation de l'impulsion
 t = 0:dt:0.1;                       % Echelle temporelle de l'evaluation de l'impulsion
 tt = -0.1:dt:0.1;
 Impultion_entree = (tt>= 0 & tt<=0.01).*U_arduino;  % Signal d'entrée
@@ -118,10 +118,10 @@ for ii=1:length(P2)
     h_e2 = h_e2+Re2(ii)*exp(Pe2(ii)*t);
 end
 % Calcul conv
-rep1 = conv(h_a1, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
-i1 = conv(h_e1, Impultion_entree, 'same')*dt;
-rep2 = conv(h_a2, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
-i2 = conv(h_e2, Impultion_entree, 'same')*dt;
+rep1 = conv(h_a1, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
+i1 = conv(h_e1, Impultion_entree, 'same')*dt/2;
+rep2 = conv(h_a2, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
+i2 = conv(h_e2, Impultion_entree, 'same')*dt/2;
 %-----affichage-----
 % Find indices where t >= 0
 idx = tt >= 0;
