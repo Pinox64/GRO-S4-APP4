@@ -40,7 +40,8 @@ PWM_Period = 1/PWM_Freq;    % [S]  Période du pwm
 
 %% 2) Fonction de transferts
 % -------------------------------------------------------------------------
-% Electrique + Mecanique
+
+% Electrique + Mecanique (enlevé)
 %H_elec_mec_Fostex = tf([0, HP1.Mm, HP1.Rm, HP1.Km], [(HP1.Mm*HP1.Le), (HP1.Mm*HP1.Re + HP1.Mm*Rs + HP1.Rm*HP1.Le), (HP1.Rm*HP1.Re + HP1.Rm*Rs + HP1.Km*HP1.Le + HP1.Bl*HP1.Bl), (HP1.Km*HP1.Re + HP1.Km*Rs)]);
 %H_elec_mec_SEAS   = tf([0, HP2.Mm, HP2.Rm, HP2.Km], [(HP2.Mm*HP2.Le), (HP2.Mm*HP2.Re + HP2.Mm*Rs + HP2.Rm*HP2.Le), (HP2.Rm*HP2.Re + HP2.Rm*Rs + HP2.Km*HP2.Le + HP2.Bl*HP2.Bl), (HP2.Km*HP2.Re + HP2.Km*Rs)]);
 
@@ -95,8 +96,9 @@ sgtitle('Diagrammes de bode', 'FontSize', 16, 'FontWeight', 'bold');
 
 %% 3) Reponse à une impulsion
 %--------------------------------------------------------------------------
-dt = 0.000001;                        % Pas de temps de l'evaluation de l'impulsion
-t = 0:dt:0.1;                       % Echelle temporelle de l'evaluation de l'impulsion
+Fe = 100e3;             % Frequence d'echantillonage
+dt = 1/Fe;              % Periode echantillonage
+t = 0:dt:0.1;           % Echelle temporelle de l'evaluation de l'impulsion
 tt = -0.1:dt:0.1;
 Impultion_entree = (tt >= 0 & tt <= 0.01).*U_arduino;  % Signal d'entrée
 idx = tt >= 0;
@@ -134,11 +136,11 @@ yElecFostex = conv(h_e1, Impultion_entree, 'same')*dt/2;     % **% Division par 
 yGlobalSEAS = conv(h_a2, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
 yElecSEAS = conv(h_e2, Impultion_entree, 'same')*dt/2;
 
-% Methode 2
-yGlobalFostex = lsim(H_global_Fostex, Impultion_entree_trunc, t);
-yElecFostex = lsim(H_elec_Fostex, Impultion_entree_trunc, t);
-yGlobalSEAS = lsim(H_global_SEAS, Impultion_entree_trunc, t);
-yElecSEAS = lsim(H_elec_SEAS, Impultion_entree_trunc, t);
+% Methode 2 (pour valider)
+%yGlobalFostex = lsim(H_global_Fostex, Impultion_entree_trunc, t);
+%yElecFostex = lsim(H_elec_Fostex, Impultion_entree_trunc, t);
+%yGlobalSEAS = lsim(H_global_SEAS, Impultion_entree_trunc, t);
+%yElecSEAS = lsim(H_elec_SEAS, Impultion_entree_trunc, t);
 
 %-----affichage-----
 % Création de la figure avec un fond blanc
