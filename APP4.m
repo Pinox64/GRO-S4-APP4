@@ -96,7 +96,7 @@ sgtitle('Diagrammes de bode', 'FontSize', 16, 'FontWeight', 'bold');
 
 %% 3) Reponse à une impulsion
 %--------------------------------------------------------------------------
-Fe = 100e3;             % Frequence d'echantillonage
+Fe = 100e4;             % Frequence d'echantillonage (augmenté pour obtenir une approximation plus exacte se rapprochant plus du simulink)
 dt = 1/Fe;              % Periode echantillonage
 t = 0:dt:0.1;           % Echelle temporelle de l'evaluation de l'impulsion
 tt = -0.1:dt:0.1;
@@ -126,15 +126,20 @@ end
 for ii=1:length(P2)
     h_e2 = h_e2+Re2(ii)*exp(Pe2(ii)*t);
 end
-h_a1=impulse(H_global_Fostex,t);
-h_e1=impulse(H_elec_Fostex,t);
-h_a2=impulse(H_global_SEAS,t);
-h_e2=impulse(H_elec_SEAS,t);
+%h_a1=impulse(H_global_Fostex,t);
+%h_e1=impulse(H_elec_Fostex,t);
+%h_a2=impulse(H_global_SEAS,t);
+%h_e2=impulse(H_elec_SEAS,t);
 % Calcul conv
-yGlobalFostex = conv(h_a1, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
-yElecFostex = conv(h_e1, Impultion_entree, 'same')*dt/2;     % **% Division par 2 pour compenser l'intégration sur un vecteur symétrique doublant l'aire effective de l'impulsion.
-yGlobalSEAS = conv(h_a2, Impultion_entree, 'same')*dt/2;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
-yElecSEAS = conv(h_e2, Impultion_entree, 'same')*dt/2;
+yGlobalFostex = conv(h_a1, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
+yElecFostex = conv(h_e1, Impultion_entree, 'same')*dt;     % **% Division par 2 pour compenser l'intégration sur un vecteur symétrique doublant l'aire effective de l'impulsion.
+yGlobalSEAS = conv(h_a2, Impultion_entree, 'same')*dt;   % Convolution pour obtenir la reponse a l'impulsion de 10ms @ 3v3
+yElecSEAS = conv(h_e2, Impultion_entree, 'same')*dt;
+
+%Remettre le delai qui est supprimé par la methode des residue
+delay = d/c;  % delay in seconds
+yGlobalFostex = interp1(t, yGlobalFostex, t - delay, 'linear', 0);
+yGlobalSEAS = interp1(t, yGlobalSEAS, t - delay, 'linear', 0);
 
 % Methode 2 (pour valider)
 %yGlobalFostex = lsim(H_global_Fostex, Impultion_entree_trunc, t);
